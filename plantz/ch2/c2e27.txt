@@ -1,0 +1,89 @@
+gdb ./c2e27 
+GNU gdb (Debian 13.1-3) 13.1
+Copyright (C) 2023 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<https://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from ./c2e27...
+(gdb) li
+1	#include <stdio.h>
+2	
+3	int main(void) {
+4	    int anInt = 19088743;
+5	    float aFloat = 19088.743;
+6	    
+7	    printf("The integer is %i and the float is %f\n", anInt, aFloat);
+8	
+9	    return 0;
+10	}
+
+(gdb) br 13
+No line 13 in the current file.
+Make breakpoint pending on future shared library load? (y or [n]) n
+
+(gdb) br 7
+Breakpoint 1 at 0x1155: file c2e27.c, line 7.
+
+(gdb) run
+Starting program: /home/ignacio/Programacion/asm/plantz/ch2/c2e27 
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, main () at c2e27.c:7
+7	    printf("The integer is %i and the float is %f\n", anInt, aFloat);
+
+(gdb) print anInt
+$1 = 19088743
+
+(gdb) print aFloat 
+$2 = 19088.7422
+
+(gdb) printf "anInt = %i and aFloat = %f\n", anInt, aFloat 
+anInt = 19088743 and aFloat = 19088.742188
+
+(gdb) printf "anInt = %#010x and aFloat = %#010x\n", anInt, aFloat 
+anInt = 0x01234567 and aFloat = 0x00004a90
+
+(gdb) print &anInt 
+$3 = (int *) 0x7fffffffe01c
+
+(gdb) print &aFloat 
+$4 = (float *) 0x7fffffffe018
+
+(gdb) x/1dw 0x7fffffffe01c
+0x7fffffffe01c:	19088743
+
+(gdb) x/1fw 0x7fffffffe018
+0x7fffffffe018:	19088.7422
+
+(gdb) x/1xw 0x7fffffffe01c
+0x7fffffffe01c:	0x01234567
+
+(gdb) x/4xb 0x7fffffffe01c
+0x7fffffffe01c:	0x67	0x45	0x23	0x01
+
+(gdb) x/1fw 0x7fffffffe018
+0x7fffffffe018:	19088.7422
+
+(gdb) x/1xw 0x7fffffffe018
+0x7fffffffe018:	0x4695217c
+
+(gdb) x/4xb 0x7fffffffe018
+0x7fffffffe018:	0x7c	0x21	0x95	0x46
+
+(gdb) cont
+Continuing.
+The integer is 19088743 and the float is 19088.742188
+[Inferior 1 (process 492892) exited normally]
+
+(gdb) q
