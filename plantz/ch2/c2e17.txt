@@ -1,0 +1,3 @@
+To store any number between 0 to 4,000,000,000 we need 32 bits (4 bytes).
+
+Starting at location 0x2fffeb96 -> 0x2fffeb97 -> 0x2fffeb98 -> 0x2fffeb99

@@ -1,0 +1,6 @@
+Letter  Bit Pattern
+A       000 = 0
+B       001 = 1
+C       010 = 2
+D       011 = 3
+F       100 = 4

@@ -1,0 +1,6 @@
+a) 2 hex digits
+b) 8 hex digits
+c) 16 hex digits
+d) 3 hex digits
+e) 5 hex digits
+f) 2 hex digit

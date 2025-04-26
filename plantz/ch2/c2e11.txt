@@ -1,0 +1,8 @@
+a) 0400
+b) 03e8
+c) 8000
+d) 7fff
+e) 0100
+f) ffff
+g) 07d5
+h) abcd

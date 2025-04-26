@@ -1,0 +1,6 @@
+a) 32 bits
+b) 48 bits
+c) 4 bits
+d) 16 bits
+e) 8 bits
+f) 32 bits

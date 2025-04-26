@@ -1,0 +1,15 @@
+letter  code
+A       0000
+A-      0001
+B+      0010    
+B       0011
+B-      0100
+C+      0101
+C       0110
+C-      0111
+D+      1000
+D       1001
+D-      1010
+F       1011
+
+There are 12 letter, with 4 bits (2^4 = 16) is sufficient.
