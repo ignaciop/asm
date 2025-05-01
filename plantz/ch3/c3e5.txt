@@ -1,0 +1,27 @@
+Four binary digits (bits)   One hexadecimal digit   Decimal equivalent
+1000                        8                       -8
+1001                        9                       -7
+1010                        a                       -6
+1011                        b                       -5
+1100                        c                       -4
+1101                        d                       -3
+1110                        e                       -2
+1111                        f                       -1
+0000                        0                       0
+0001                        1                       1
+0010                        2                       2
+0011                        3                       3
+0100                        4                       4
+0101                        5                       5
+0110                        6                       6
+0111                        7                       7
+
+a) -4 + (-5) = 7 (Error!):
+   1 
+    1100
++   1011
+---------
+    0111
+    
+No, it doesn't work. The problem is that the range of 4-bit signed numbers in two's com-
+plement format is −8 <= x <= +7, and -4 + (-5) exceeds this range.

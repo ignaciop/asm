@@ -1,0 +1,32 @@
+Four binary digits (bits)   One hexadecimal digit   Decimal equivalent
+1000                        8                       -8
+1001                        9                       -7
+1010                        a                       -6
+1011                        b                       -5
+1100                        c                       -4
+1101                        d                       -3
+1110                        e                       -2
+1111                        f                       -1
+0000                        0                       0
+0001                        1                       1
+0010                        2                       2
+0011                        3                       3
+0100                        4                       4
+0101                        5                       5
+0110                        6                       6
+0111                        7                       7
+
+a) 3 + (-3) = 0:
+   1111
+    0011
++   1101
+---------
+    0000
+    
+CF = 1
+OF = 0
+
+Adding any number to its negative will set the CF to one and the OF to zero. The sum is 2n, where n is the number of bits used for representing the signed integer. That is, the sum is one followed by n zeroes. The one gets recorded in the CF. Since the CF is irrelevant in two's complement arithmetic, the result — n zeroes — is correct
+
+In two's complement, zero does not have a representation of opposite sign. (-0.0 does exist
+in IEEE 754 floating point.) Also, −2n − 1 does not have a representation of opposite sign.

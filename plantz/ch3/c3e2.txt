@@ -1,0 +1,9 @@
+Store a digit in every four bits. Thus, the lowest-order digit would be stored in bits 7 – 0, the next lowest-order in 15 – 8, etc., with the highest-order digit in bits 31 – 24.
+
+No, binary addition does not work. For example, let’s consider 48 + 27:
+
+number  32 bits (hex)
+48      ==> 00000048 
++ 27    ==> 00000027
+----
+75      0000007f

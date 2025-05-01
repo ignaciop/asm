@@ -1,0 +1,23 @@
+a) 0000
+CF = 1 -> unsigned wrong
+OF = 0 -> signed right
+
+b) 1110
+CF = 1 -> unsigned wrong
+OF = 0 -> signed right
+
+c) 0000
+CF = 1 -> unsigned wrong
+OF = 1 -> signed wrong
+
+d) 03ff
+CF = 1 -> unsigned wrong
+OF = 0 -> signed right
+
+e) 7fff
+CF = 0 -> unsigned right
+OF = 0 -> signed right
+
+f) 7fff
+CF = 1 -> unsigned wrong
+OF = 1 -> signed wrong

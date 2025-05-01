@@ -1,0 +1,75 @@
+a) 55 + aa = 01010101 + 10101010
+
+**Unsigned**:
+
+    01010101
++   10101010
+-------------
+    11111111
+    
+=> 55 + aa = ff
+
+in decimal: 85 + 170 = 255
+
+**Signed**:
+
+aa = 10101010
+
+Bit flip: 01010101
++1      : 01010110
+
+So aa is -86 in decimal
+
+=> 55 + aa = 85 + (-86) = -1 in decimal. Let's see:
+
+55 + aa = ff:
+
+ff -> Bit flip + 1 = 00000001
+
+So -1 is correct
+
+b) 55 + f0 = 01010101 + 11110000
+
+**Unsigned**:
+   1
+    01010101
++   11110000
+-------------
+    01000101
+    
+=> 55 + f0 = 45
+
+in decimal: 85 + 240 = 69. Wrong
+
+**Signed**:
+
+f0 = 11110000
+
+Bit flip: 00001111
++1      : 00010000
+
+So f0 is -16 in decimal
+
+=> 55 + f0 = 85 + (-16) = 69 in decimal. Let's see:
+
+55 + f0 = 45 = 01000101
+
+So 69 is correct
+
+The rest uses the same logic. Here are the results:
+
+c) fb
+CF = 0 -> unsigned right
+OF = 0 -> signed right
+
+d) de
+CF = 0 -> unsigned right
+OF = 1 -> signed wrong
+
+e) 0e
+CF = 1 -> unsigned wrong
+OF = 0 -> signed right
+
+f) 00
+CF = 1 -> unsigned wrong
+OF = 1 -> signed wrong
