@@ -1,0 +1,24 @@
+Decimal digit   BCD code (four bits)
+0               0000
+1               0001
+2               0010
+3               0011
+4               0100
+5               0101
+6               0110
+7               0111
+8               1000
+9               1001
+
+We have 4 bytes, so F := F(w, x, y, z). The primes are 2, 3, 5, 7:
+
+F(0, 0, 1, 0) = 1
+F(0, 0, 1, 1) = 1
+F(0, 1, 0, 1) = 1
+F(0, 1, 1, 1) = 1
+
+So, w = 0, x, y, z = 0,1
+
+If x = 0, y = 1 and viceversa. When x = 0, z = 0. Then:
+
+F(w, x, y, z) = x * z + x' * y
