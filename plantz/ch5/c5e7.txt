@@ -1,0 +1,13 @@
+             ┌────────────┐
+ WriteData ─▶│ Register 0 │◀── Decoder[0] & WriteEnable
+             ├────────────┤
+ WriteData ─▶│ Register 1 │◀── Decoder[1] & WriteEnable
+             ├────────────┤
+                ...
+             ├────────────┤
+ WriteData ─▶│ Register 7 │◀── Decoder[7] & WriteEnable
+             └────────────┘
+
+             ┌────────────┐
+   ReadReg ─▶│ 4x 8-to-1 MUX│──▶ ReadData[3:0]
+             └────────────┘
