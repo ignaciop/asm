@@ -1,0 +1,7 @@
+gcc -g -O0 -Wall -fno-asynchronous-unwind-tables -fno-stack-protector c6e3.c -o c6e3
+
+c6e3.c: In function ‘main’:
+c6e3.c:10:5: error: address of register variable ‘ex’ requested
+   10 |     ptr = &ex;
+
+The compiler will not use a register for the integer variable because the algorithm requires the address of this variable, and registers have no memory address.
