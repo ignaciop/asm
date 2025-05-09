@@ -1,0 +1,71 @@
+Practice Problems
+
+3.1)
+
+Address Value   Register    Value
+0x100   0xFF    %rax        0x100
+0x104   0xAB    %rcx        0x1
+0x108   0x13    %rdx        0x3
+0x10C   0x11
+
+Operand         Value
+%rax            0x100
+0x104           0xAB
+$0x108          0x108
+(%rax)          0xFF
+4(%rax)         0xAB
+9(%rax, %rdx)   0x11
+260(%rcx, %rdx) 0x13
+0xFC(, %rcx, 4) 0xFF
+(%rax, %rdx, 4) 0x11
+
+3.2)
+
+movl %eax, (%rsp)
+movw (%rax), %dx
+movb $0xFF, %bl
+movb (%rsp, %rdx, 4), %dl
+movq (%rdx), %rax
+movw %dx, (%rax)
+
+3.3)
+
+movb $0xF, (%ebx) # %ebx cannot be used as address register
+movl %rax, (%rsp) # Mismatch between instruction suffix and register ID
+movw (%rax), 4(%rsp) # Source and destination are memory addresses at the same time
+movb %al, %sl # No register named %sl
+movq %rax, $0x123 # Destination cannot be a literal
+movl %eax, %rdx # Destination operand incorrect size
+movb %si, 8(%rbp) # Mismatch between instruction suffix and register ID
+
+3.4)
+
+# sp in %rdi, dp in %rsi
+
+# long - long
+movq (%rdi), %rax # Read 8 bytes
+movq %rax, (%rsi) # Store 8 bytes
+
+# char - int 
+movsbl (%rdi), %eax # Convert char to int
+movl %eax, (%rsi) # Store 4 bytes
+
+# char - unsigned
+movsbl (%rdi), %eax # Convert char to int
+movl %eax, (%rsi) # Store 4 bytes
+
+# unsigned char - long
+movzbl (%rdi), %eax # Read byte and zero-extend
+movq %rax, (%rsi) # Store 8 bytes
+
+# int - char
+movl (%rdi), %eax # Read 4 bytes
+movb %al, (%rsi) # Store low-order byte
+
+# unsigned - unsigned char
+movl (%rdi), %eax # Read 4 bytes
+movb %al, (%rsi) # Store low-order byte
+
+char - short
+movsbw (%rdi), %ax # Read byte and sign-extend
+movw %ax, (%rsi) # Store 2 bytes
