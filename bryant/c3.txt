@@ -1,5 +1,7 @@
 Practice Problems
 
+--------------------------------------------------------------------------------
+
 3.1)
 
 Address Value   Register    Value
@@ -19,6 +21,8 @@ $0x108          0x108
 0xFC(, %rcx, 4) 0xFF
 (%rax, %rdx, 4) 0x11
 
+--------------------------------------------------------------------------------
+
 3.2)
 
 movl %eax, (%rsp)
@@ -27,6 +31,8 @@ movb $0xFF, %bl
 movb (%rsp, %rdx, 4), %dl
 movq (%rdx), %rax
 movw %dx, (%rax)
+
+--------------------------------------------------------------------------------
 
 3.3)
 
@@ -37,6 +43,8 @@ movb %al, %sl # No register named %sl
 movq %rax, $0x123 # Destination cannot be a literal
 movl %eax, %rdx # Destination operand incorrect size
 movb %si, 8(%rbp) # Mismatch between instruction suffix and register ID
+
+--------------------------------------------------------------------------------
 
 3.4)
 
@@ -69,3 +77,317 @@ movb %al, (%rsi) # Store low-order byte
 char - short
 movsbw (%rdi), %ax # Read byte and sign-extend
 movw %ax, (%rsi) # Store 2 bytes
+
+--------------------------------------------------------------------------------
+
+3.5)
+
+# xp in %rdi, yp in %rsi, zp in %rdx
+
+decode1:
+    movq (%rdi), %r8
+    movq (%rsi), %rcx
+    movq (%rdx), %rax
+    movq %r8, (%rsi)
+    movq %rcx, (%rdx)
+    movq %rax, (%rdi)
+    ret
+    
+void decode1(long *xp, long *yp, long *zp) {    
+    long r8 = *xp;
+    long c = *yp;
+    long a = *zp;
+    
+    *yp = r8;
+    *zp = c;
+    *xp = a;
+}
+
+--------------------------------------------------------------------------------
+
+3.6)
+
+# %rax holds x, %rcx holds y
+
+Instruction                 Result
+leaq 6(%rax), %rdx          x + 6
+leaq (%rax, %rcx), %rdx     x + y
+leaq (%rax, %rcx, 4), %rdx  x + 4 * y
+leaq 7(%rax, %rax, 8), %rdx 9 * x + 7
+leaq 0xA(, %rcx, 4), %rdx   4 * y + 10
+leaq 9(%rax, %rcx, 2), %rdx x + 2 * y + 9
+
+--------------------------------------------------------------------------------
+
+3.7)
+
+# x in %rdi, y in %rsi, z in %rdx
+
+scale2:
+    leaq (%rdi, %rdi, 4), %rax
+    leaq (%rax, %rsi, 2), %rax
+    leaq (%rax, %rdx, 8), %rax
+    ret
+    
+long scale2(long x, long y, long z) {    
+    long t = 5 * x + 2 * y + 8 * z;
+    
+    return t;
+}
+
+--------------------------------------------------------------------------------
+
+3.8)
+
+Address Value   Register    Value
+0x100   0xFF    %rax        0x100
+0x108   0xAB    %rcx        0x1
+0x110   0x13    %rdx        0x3
+0x118   0x11
+
+Instruction                 Destination     Value
+addq %rcx, (%rax)           0x100           0x10
+subq %rdx, 8(%rax)          0x108           0xA8
+imulq $16, (%rax, %rdx, 8)  0x118           0x110
+incq 16(%rax)               0x110           0x14
+decq %rcx                   %rcx            0x0
+subq %rdx, %rax             %rax            0xFD
+
+--------------------------------------------------------------------------------
+  
+3.9)
+
+long shift_left4_rightn(long x, long n) {
+    x <<= 4;
+    x >>= n;
+    
+    return n;
+}
+
+# x in %rdi, n in %rsi
+
+shift_left4_rightn:
+    movq %rdi, %rax # Get x
+    salq $4, %rax # x <<= 4
+    movl %esi, %ecx # Get n (4 bytes)
+    sarq %cl, %rax # x >>= n
+    
+--------------------------------------------------------------------------------
+    
+3.10)
+
+# x in %rdi, y in %rsi, z in %rdx
+
+arith2:
+    orq %rsi, %rdi
+    sarq $3, %rdi
+    notq %rdi
+    movq %rdx, %rax
+    subq %rdi, %rax
+    ret
+    
+long arith2(long x, long y, long z) {
+    long t1 = x | y;
+    long t2 = t1 >> 3;
+    long t3 = ~t2;
+    long t4 = z - t3;
+    
+    return t4;
+}
+
+--------------------------------------------------------------------------------
+
+3.11) 
+
+xorq %rdx, %rdx
+
+a) This clears the %rdx register, so %rdx = 0x0000000000000000. In C, x = 0
+b) movq $0, %rdx
+c) xorq requires 3 bytes, movq requires 7 bytes
+
+--------------------------------------------------------------------------------
+
+3.12)
+
+void uremdiv(unsigned long x, unsigned long y, unsigned long *qp, unsigned long *rp) {
+    unsigned long q = x / y;
+    unsigned long r = x % y;
+    *qp = q;
+    *rp = r;
+}
+
+# x in %rdi, y in %rsi, qp in %rdx, rp in %rcx
+
+uremdiv:
+    movq %rdx, %r8 # Copy qp
+    movq %rdi, %rax # Move x to lower 8 bytes of dividend
+    xorq %rdx, %rdx # Set %rdx to zero
+    divq %rsi # Divide by y
+    movq %rax, (%r8) # Store quotient at qp
+    movq %rdx, (%rcx) # Store remainder at rp
+    ret
+    
+--------------------------------------------------------------------------------
+
+3.13)
+
+A) data_t: int; COMP: <
+B) data_t: short; COMP: >=
+C) data_t: unsigned char; COMP: <=
+D) data_t: long, unsigned long; *, COMP: !=
+
+--------------------------------------------------------------------------------
+
+3.14)
+
+A) data_t: long; COMP: >=
+B) data_t: short, unsigned short; COMP: ==
+C) data_t: unsigned char; COMP: >
+D) data_t: int; COMP: <=
+
+--------------------------------------------------------------------------------
+
+3.15)
+
+a)
+4003fa: 74 02       je 4003fe
+4003fc: ff d0       callq *%rax
+
+b)
+40042f: 74 f4       je 400425
+400431: 5d          pop %rbp
+
+c)
+400543: 77 02       ja 400547
+400545: 5d          pop %rbp
+
+d)
+4005e8: e9 73 ff ff ff ff       jmpq 400560
+4005ed: 90                      nop
+
+--------------------------------------------------------------------------------
+
+3.16)
+
+void cond(long a, long *p) {
+    if (p && a > *p) {
+        *p = a;
+    }
+}
+
+# a in %rdi, p in %rsi
+
+cond:
+    testq %rsi, %rsi # p != 0
+    je .L1 # p == 0, go to .L1
+    cmpq %rdi, (%rsi) # *p < a
+    jge .L1 # p >= a, go to .L1
+    movq %rdi, (%rsi) # *p = a
+.L1:
+    rep
+    ret
+    
+a)
+    
+void cond(long a, long *p){
+    if (p == 0) {
+        goto exit;
+    }
+    
+    if (*p >= a) {
+        goto exit;
+    }
+    
+    *p = a;
+    
+    exit:
+        return;
+}
+
+b)
+
+The first conditional branch is part of the implementation of the && expression. If the test for p being non-null fails, the code will skip the test of a > *p.
+
+--------------------------------------------------------------------------------
+
+3.17)
+
+a)
+
+long absdiff_se(lonx, long y) {
+    long result;
+    
+    if (x < y) {
+        goto x_lt_y;
+    }
+    
+    ge_cnt++;
+    result = x - y;
+    
+    goto res;
+    
+    x_lt_y:
+        lt_cnt++;
+        result = y - x;
+    
+    res: 
+        return result;
+}
+
+b)
+
+t = test-expr;
+if (!t)
+    goto done;
+then-statement
+done:
+
+--------------------------------------------------------------------------------
+
+3.18)
+
+# x in %rdi, y in %rsi, z in %rdx
+
+test:
+    leaq (%rdi, %rsi), %rax
+    addq %rdx, %rax
+    cmpq $-3, %rdi
+    jge .L2
+    cmpq %rdx, %rsi
+    jge .L3
+    movq %rdi, %rax
+    imulq %rsi, %rax
+    ret
+.L3:
+    movq %rsi, %rax
+    imulq %rdx, %rax
+    ret
+.L2:
+    cmpq $2, %rdi
+    jle .L4
+    movq %rdi, %rax
+    imulq %rdx, %rax
+.L4:
+    rep
+    ret
+    
+long test(long x, long y, long z) {
+    long val = x + y + z;
+    
+    if (x < -3) {
+        if (y < z) {
+            val = x * y;
+        } else {
+            val = y * z;
+        }
+    } else if (x > 2) {
+        val = x * z;
+    }
+    
+    return val;
+}
+
+--------------------------------------------------------------------------------
+
+3.19)
+
