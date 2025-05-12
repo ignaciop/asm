@@ -391,3 +391,420 @@ long test(long x, long y, long z) {
 
 3.19)
 
+a)
+
+We have T_MP = 2 * (T_ran - T_OK), with T_ran = 31 and T_OK = 16.
+So, T_MP = 2 * (31 - 16) = 2 * 15 = 30
+
+b)
+
+T_OK + T_MP = 30 + 16 = 46
+
+--------------------------------------------------------------------------------
+
+3.20)
+
+a, b)
+
+#define OP /
+
+long arith(long x) {
+    return x OP 8;
+}
+
+# x in %rdi
+
+arith:
+    leaq 7(%rdi), %rax # y = x + 7
+    testq %rdi, %rdi # Test x
+    cmovns %rdi, %rax # if x >= 0, then y = x
+    sarq $3, %rax # y = y >> 3
+    ret
+    
+--------------------------------------------------------------------------------
+
+3.21)
+
+long test(long x, long y) {
+    long val = x * 8;
+    
+    if (y > 0) {
+        if (x < y) {
+            val = y - x;
+        } else {
+            val = x & y;
+        }
+    } else if (y <= -2) {
+        val = x + y;
+    }
+    
+    return val;
+    
+# x in %rdi, y in %rsi
+
+test:
+    leaq 0(, %rdi, 8), %rax
+    testq %rsi, %rsi
+    jle .L2
+    movq %rsi, %rax
+    subq %rdi, %rax
+    movq %rdi, %rdx
+    andq %rsi, %rdx
+    cmpq %rsi, %rdi
+    cmovge %rdx, %rax
+    ret
+.L2:
+    addq %rsi, %rdi
+    cmpq $-2, %rsi
+    cmovle %rdi, %rax
+    ret
+
+--------------------------------------------------------------------------------
+
+3.22)
+
+a)
+
+n = 12
+
+b)
+
+n = 20
+
+--------------------------------------------------------------------------------
+
+3.23)
+
+a)
+
+x in %rdi, y in %rcx, n in %rdx
+
+b)
+
+leaq 1(%rcx, %rax), %rax
+
+c)
+
+dw_loop:
+    movq %rdi, %rax # Copy x to %rax
+    movq %rdi, %rcx # y = x
+    imulq %rdi, %rcx # y = x * x
+    leaq (%rdi, %rdi), %rdx # n = x + x
+.L2:
+    leaq 1(%rcx, %rax), %rax # x = x + y + 1
+    subq $1, %rdx # n = n - 1
+    testq %rdx, %rdx # Test n
+    jg .L2 # if n > 0, go to .L2
+    rep
+    ret
+    
+--------------------------------------------------------------------------------
+
+3.24)
+
+long loop_while(long a, long b) {
+    long result = 1;
+    
+    while (a < b) {
+        result = result * (a + b);
+        a = a + 1;
+    }
+    
+    return result;
+}
+
+# a in %rdi, b in %rsi
+
+loop_while:
+    movl $1, %eax
+    jmp .L2
+.L3:
+    leaq (%rdi, %rsi), %rdx
+    imulq %rdx, %rax
+    addq $1, %rdi
+.L2:
+    cmpq %rsi, %rdi
+    jl .L3
+    rep
+    ret
+    
+--------------------------------------------------------------------------------
+
+3.25)
+
+long loop_while2(long a, long b) {
+    long result = b;
+    
+    while (b > 0) {
+        result = result * a;
+        b = b - a;
+    }
+    
+    return result;
+}
+
+# a in %rdi, b in %rsi
+
+loop_while:
+    testq %rsi, %rsi
+    jle .L8
+    movq %rsi, %rax
+.L7:
+    imulq %rdi, %rax
+    subq %rdi, %rsi
+    testq %rsi, %rsi
+    jg .L7
+    rep
+    ret
+.L8:
+    movq %rsi, %rax
+    ret
+    
+--------------------------------------------------------------------------------
+
+3.26)
+
+a)
+
+It uses the jump-to-middle translation, using the jmp instruction
+
+b)
+
+long fun_a(unisgned long x) {
+    long val = 0;
+    
+    while (x != 0) {
+        val = val ^ x;
+        x = x >> 1;
+    }
+    
+    val = val & 1;
+    
+    return val;
+}
+
+# x in %rdi
+
+fun_a:
+    movl $0, eax
+    jmp .L5
+.L6:
+    xorq %rdi, %rax
+    shrq %rdi # Shift right by 1
+.L5:
+    testq %rdi, %rdi
+    jne .L6
+    andl $1, %eax
+    ret
+    
+c)
+
+It computes the parity of argument x. That is, it returns 1 if there is an odd number
+of ones in x and O if there is an even number.
+
+--------------------------------------------------------------------------------
+
+3.27)
+
+long fact_for(long n) {
+    long i = 2;
+    long result = 1;
+    
+    if (n <= 1) {
+        goto done;
+    }
+    
+    loop:
+        result *= i;
+        i++;
+        
+        if (i <= n) {
+            goto loop;
+        }
+    
+    done:
+        return result;
+}
+
+--------------------------------------------------------------------------------
+
+3.28)
+
+# x in %rdi
+
+fun_b:
+    movl $64, %edx
+    movl $0, %eax
+.L10:
+    movq %rdi, %rcx
+    andl $1, %ecx
+    addq %rax, %rax
+    orq %rcx, %rax
+    shrq %rdi # Shift right by 1
+    subq $1, %rdx
+    jne .L10
+    rep
+    ret
+    
+a)
+
+long fun_b(unsigned long x) {
+    long val = 0;
+    long i;
+    
+    for (i = 64; i >= 0; i--) {
+        val = (val << 1) | (x & 1);
+        x = x >> 1; 
+    }
+    
+    return val;
+}
+
+b)
+
+The code was generated using the guarded-do transformation, but the com­ piler detected that,
+since i is initialized to 64, it will satisfy the test i != 0, and therefore the initial test 
+is not required.
+
+c)
+
+This code reverses the bits in x, creating a mirror image. It does this by shifting the 
+bits of x from left to right, and then filling these bits in as it shifts val from right to 
+left.
+
+--------------------------------------------------------------------------------
+
+3.29)
+
+a)
+
+This code has an infinite loop, since the continue statement would prevent index variable 
+i from being updated.
+
+b)
+
+/* Sum even numbers between O and 9 */
+
+long sum = O;
+long i = 0;
+
+while (i < 10) {
+    if (i & 1) {
+        goto update;
+    }
+
+    sum + = i;
+    
+    update:
+        i++;
+}
+
+--------------------------------------------------------------------------------
+
+3.30)
+
+# x in %rdi
+
+switch2:
+    addq $1, %rdi
+    cmpq $8, %rdi
+    ja .L2
+    jmp *.L4(, %rdi, 8)
+    
+.L4:
+    .quad .L9
+    .quad .L5
+    .quad .L6
+    .quad .L7
+    .quad .L2
+    .quad .L7
+    .quad .L8
+    .quad .L2
+    .quad .L5
+    
+a)
+
+void switch2(long x, long *dest) {
+    long val = 0;
+    
+    switch (x) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+    }
+    
+    *dest = val;
+}
+
+a) The case labels in the switch statement body have values -1, 0, 1, 2, 4, 5,
+and 7
+
+b) The case with destination .L5 has labels O and 7. The case with destination 
+.L7 has labels 2 and 4.
+
+--------------------------------------------------------------------------------
+
+3.31)
+
+# a in %rdi, b in %rsi, c in %rdx, dest in %rcx
+
+switcher:
+    cmpq $7, %rdi
+    ja .L2
+    jmp *.L4(, %rdi, 8)
+    .section .rodata
+.L7:
+    xorq $15, %rsi
+    movq %rsi, %rdx
+.L3:
+    leaq 112(%rdx), %rdi
+    jmp .L6
+.L5:
+    leaq (%rdx, %rsi), %rdi
+    salq $2, %rdi
+    jmp .L6
+.L2:
+    movq %rsi, %rdi
+.L6:
+    movq %rdi, (%rcx)
+    ret
+    
+ .L4:
+    .quad .L3
+    .quad .L2
+    .quad .L5
+    .quad .L2
+    .quad .L6
+    .quad .L7
+    .quad .L2
+    .quad .L5
+    
+void switcher(long a, long b, long c, long *dest) {
+    long val;
+    
+    switch (a) {
+        case 5: /* Case A */
+            c = b ^ 15;
+            /* Fall through */
+        case 0: /* Case B */
+            val = c + 112;
+            break;
+        case 2: /* Case C */
+        case 7: /* Case D */
+            val = (c + b) << 2;
+            break;
+        case 4: /* Case E */
+            val = a;
+            break;
+        default:
+            val = b;    
+    }
+    
+    *dest = val;
+}
+    
