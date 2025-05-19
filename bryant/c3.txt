@@ -808,3 +808,93 @@ void switcher(long a, long b, long c, long *dest) {
     *dest = val;
 }
     
+--------------------------------------------------------------------------------
+
+3.32)
+
+        Instruction                     State values (at beginning)
+Label   PC          Instruction %rdi    %rsi    %rax    %rsp            *%rsp               Description
+M1      0x400560    callq       10                      0x7fffffffe820                      Call first(10)
+
+F1      0x400548    lea         10                      0x7fffffffe818  0x400565            Entry of first
+F2      0x40054c    sub         10      11              0x7fffffffe818  0x400565            
+F3      0x400550    callq       9       11              0x7fffffffe818  0x400565            Call last(9, 11)
+
+L1      0x400540    mov         9       11              0x7fffffffe810  0x400555            Entry of last
+L2      0x400543    imul        9       11      9       0x7fffffffe810  0x400555                                   
+L3      0x400547    retq        9       11      99      0x7fffffffe810  0x400555            Return 99 from last
+
+F4      0x400555    repz retz   9       11      99      0x7fffffffe818  0x400565            Return 99 from first
+
+M2      0x400565    mov         9       11      99      0x7fffffffe820                      Resume main
+
+--------------------------------------------------------------------------------
+
+3.33)
+
+%edi -> a
+%sil -> b
+%rdx -> u
+%rcx -> v
+
+--------------------------------------------------------------------------------
+
+3.34)
+
+a)
+
+%rbx, %r15, %r14, %r13, %r12 and %rbp are callee - saved:
+
+x -> %rbx
+x + 1 -> %r15
+x + 2 -> %r14
+x + 3 -> %r13
+x + 4 -> %r12
+x + 5 -> %rbp
+
+b)
+
+x + 6 -> %rax -> (%rsp)
+x + 7 -> %rdx -> 8(%rsp)
+
+c)
+
+After storing six local variables, the program has used up the supply of callee -  saved registers. It stores the remaining two local values on the stack.
+
+--------------------------------------------------------------------------------
+
+3.35)
+
+# x in %rdi
+
+rfun:
+    pushq %rbx
+    movq %rdi, %rbx
+    movl $0, %eax
+    testq %rdi, %rdi
+    je .L2
+    shrq $2, %rdi
+    call rfun
+    addq %rbx, %rax
+.L2:
+    popq %rbx
+    ret
+    
+a)
+
+%rbx stores x
+
+b)
+
+long rfun(unsigned long x) {
+    if (x == 0) {
+        return x;
+    }
+    
+    unsigned long nx = x >> 2;
+    long rv = rfun(nx);
+    
+    return x + rv;
+}
+
+--------------------------------------------------------------------------------
