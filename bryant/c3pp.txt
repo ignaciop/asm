@@ -962,3 +962,34 @@ From this, we know that P has 7 columns, while Q has 5, thus M = 5 and N = 7.
 --------------------------------------------------------------------------------
 
 3.39)
+
+Equation 3.1: &D[i][j] = x_D + L * (C * i + j)
+
+int *Aptr = &A[i][0]; /* Points to elements in row i of A */
+int *Bptr = &B[0][k]; /* Points to elements in column k of B */
+int *Bend = &B[N][k]; /* Marks stopping point for Bptr */
+
+Using the equation:
+
+&A[i][0] = x_A + 4 * (16 * i)
+&B[0][k] = x_B + 4 * k
+&B[N][k] = x_B + 4 * (16 * 16 + k)
+
+--------------------------------------------------------------------------------
+
+3.40)
+
+int fix_set_diag_opt(fix_matrix A, int val) {
+    int *Aptr = &A[0][0]; /* Points to first elemnt of A */
+    
+    long i = 0;
+    long end = N * (N + 1);
+    
+    do {
+        Aptr[i] = val;
+        i += N + 1;
+    } while (i != end);
+}
+
+--------------------------------------------------------------------------------
+
