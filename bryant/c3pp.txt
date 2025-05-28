@@ -993,3 +993,92 @@ int fix_set_diag_opt(fix_matrix A, int val) {
 
 --------------------------------------------------------------------------------
 
+3.41)
+
+struct prob {
+    int *p;
+    
+    struct {
+        int x;
+        int y;
+    } s;
+    
+    struct prob *next;
+};
+
+a) 
+
+Offsets (in bytes):
+
+p: 0 - 7
+s.x: 8 - 11
+s.y: 12 - 15
+next: 16 - 23
+
+b)
+
+The structure requires 24 bytes
+
+c)
+
+#sp in %rdi
+
+sp_init:
+    movl 12(%rdi), %eax # Get sp->s.y
+    movl %eax, 8(%rdi) # Save in sp->s.x
+    leaq 8(%rdi), %rax # Compute &(sp->s.x)
+    movq %rax, (%rdi) # Store in sp->p
+    movq %rdi, 16(%rdi) # Store sp in sp->next
+    ret
+    
+void sp_init(struct prob *sp) {
+    sp->s.x = sp->y;
+    sp->p = &(sp->s.x);
+    sp->next = sp;
+}
+
+--------------------------------------------------------------------------------
+
+3.42)
+
+struct ELE {
+    long v;
+    struct ELE *p;
+}
+
+# ptr in %rdi
+
+fun:
+    movl $0, %eax
+    jmp .L2
+.L3:
+    addq (%rdi), %rax
+    movq 8(%rdi), %rdi
+.L2:
+    testq %rdi, %rdi
+    jne .L3
+    rep
+    ret
+    
+a)
+
+long fun(struct ELE *ptr) {
+    long result = 0;
+    
+    while (ptr != 0) {
+        result += ptr->v;
+        
+        ptr = ptr->p;
+    }
+    
+    return result;
+}
+
+b)
+
+I think this data structure represents a node within a linked list, with field
+v being the value of the element and p being a pointer to the next element.
+fun returns the sum of all nodes values in the list.
+
+--------------------------------------------------------------------------------
+
