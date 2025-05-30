@@ -1082,3 +1082,132 @@ fun returns the sum of all nodes values in the list.
 
 --------------------------------------------------------------------------------
 
+3.43)
+
+typedef union {
+    struct {
+        long u;
+        short v;
+        char w;
+    } t1;
+    
+    struct {
+        int a[2];
+        char *p;
+    } t2;
+} u_type;
+
+void get(u_type *up, type *dest) {
+    *dest = expr;
+}
+
+# up in %rdi, dest in %rsi
+
+expr                type        Code
+up->t1.u            long        movq (%rdi), %rax
+                                movq %rax, (%rsi)
+                        
+up->t1.v            short       movw 8(%rdi), %ax
+                                movw %ax, (%rsi)
+                        
+&up->t1.w           char *      addq $10, %rdi
+                                movq %rdi, (%rsi)
+                        
+up->t2.a            int *       movq %rdi, (%rsi)
+
+up->t2.a[up->t1.u]  int         movq (%rdi), %rax
+                                movl (%rdi, %rax, 4), %eax
+                                movl %eax, (%rsi)
+                                
+*up->t2.p                       movq 8(%rdi), %rax
+                                movb (%rax), %al
+                                movb %al, (%rsi)
+                                
+--------------------------------------------------------------------------------
+
+3.44)
+
+a)
+
+struct P1 {int i; char c; int j; char d;};
+
+Offset -> i: 0, c: 4, j: 8, d: 12
+Total size: 16 bytes
+Alignment: 4 bytes
+
+b)
+
+struct P2 {int i; char c; char d; long j;};
+
+Offset -> i: 0, c: 4, d: 5, j: 8
+Total size: 24 bytes
+Alignment: 8 bytes
+
+c)
+
+struct P3 {short w[3]; char c[3];};
+
+Offset -> w: 0, c: 6
+Total size: 10 bytes
+Alignment: 2 bytes
+
+d)
+
+struct P4 {short w[5]; char *c[3];};
+
+Offset -> w: 0, c: 16
+Total size: 40 bytes
+Alignment: 8 bytes
+
+e)
+
+struct P5 {struct P3 a[2]; struct P2 t;};
+
+Offset -> a: 0, t: 24
+Total size: 40 bytes
+Alignment: 8 bytes
+
+--------------------------------------------------------------------------------
+
+3.45)
+
+struct {
+    char *a;
+    short b;
+    double c;
+    char d;
+    float e;
+    char f;
+    long g;
+    int h;
+} rec;
+
+a)
+
+Offset -> a: 0, b: 8, c: 16, d: 24, e: 28, f: 32, g: 40, h: 48
+
+b) 
+
+The structure is 56 bytes long. The end of the structure must be
+padded by 4 bytes to satisfy the 8-byte alignment requirement.
+
+c)
+
+struct {
+    char *a;
+    double c;
+    long g;
+    float e;
+    int h;
+    short b;
+    char d;
+    char f;
+} rec;
+
+Offset -> a: 0, c: 8, g: 16, e: 24, h: 28, b: 32, d: 34, f: 35
+
+The structure is 40 bytes long. The end of the structure must be
+padded by 4 bytes to satisfy the 8-byte alignment requirement.
+
+--------------------------------------------------------------------------------
+
