@@ -1,0 +1,7 @@
+1999 1
+1 1999
+2 1998
+1998 2
+...
+
+# Any combination that sums 2000 works
