@@ -662,15 +662,11 @@ long fun_b(unsigned long x) {
 
 b)
 
-The code was generated using the guarded-do transformation, but the com­ piler detected that,
-since i is initialized to 64, it will satisfy the test i != 0, and therefore the initial test 
-is not required.
+The code was generated using the guarded-do transformation, but the com­piler detected that, since i is initialized to 64, it will satisfy the test i != 0, and therefore the initial test is not required.
 
 c)
 
-This code reverses the bits in x, creating a mirror image. It does this by shifting the 
-bits of x from left to right, and then filling these bits in as it shifts val from right to 
-left.
+This code reverses the bits in x, creating a mirror image. It does this by shifting the bits of x from left to right, and then filling these bits in as it shifts val from right to  left.
 
 --------------------------------------------------------------------------------
 
@@ -678,8 +674,7 @@ left.
 
 a)
 
-This code has an infinite loop, since the continue statement would prevent index variable 
-i from being updated.
+This code has an infinite loop, since the continue statement would prevent index variable i from being updated.
 
 b)
 
@@ -1211,3 +1206,338 @@ padded by 4 bytes to satisfy the 8-byte alignment requirement.
 
 --------------------------------------------------------------------------------
 
+3.46)
+
+a) After line 3:
+
+00 00 00 00 00 40 00 76 -> Return address
+01 23 45 67 89 AB CD EF -> Saved %rbx
+
+b) After line 5:
+
+00 00 00 00 00 40 00 34 -> Return address
+33 32 31 30 39 38 37 36 -> Saved %rbx
+35 34 33 32 31 30 39 38
+37 36 35 34 33 32 31 30 -> buf
+
+c) 
+
+The program is attempting to return to address 0x400034. The low-order 2 bytes were overwritten by the code for character '4' and the terminating null character.
+
+d)
+
+The saved value of register %rbx was set to 0x33323 13039383736. This value
+will be loaded into the register before get_line returns.
+
+e)
+
+The call to malloc should have had strlen(buf) + 1 as its argument, and the
+code should also check that the returned value is not equal to NULL.
+
+--------------------------------------------------------------------------------
+
+3.47)
+
+a)
+
+This corresponds to a range of around 2^13 addresses.
+
+b)
+
+A 128-byte nop sled would cover 2^7 addresses with each test, and so we would
+only require around 2^6 = 64 attempts.
+
+--------------------------------------------------------------------------------
+
+3.48)
+
+int len(char *s) {
+    return strlen(s);
+}
+
+void iptoa(char *s, long *p) {
+    long val = *p;
+    sprintf(s, "%ld", val);
+}
+
+int intlen(long x) {
+    long v;
+    char buf[12];
+    v = x;
+    iptoa(buf, &v);
+    return len(buf);
+}
+
+a)
+
+For the unprotected code, we can see that lines 4 and 5 compute the positions
+of v and buf to be at offsets 24 and O relative to %rsp. In the protected code,
+the canary is stored at offset 40 (line 4), while v and buf are at offsets 8 and
+16 (lines 7 and 8).
+
+b)
+
+In the protected code, local variable v is positioned closer to the top of the
+stack than buf, and so an overrun of buf will not corrupt the value of v.
+
+--------------------------------------------------------------------------------
+
+3.49)
+
+a)
+
+The leaq instruction of line 5 computes the value 8n + 22, which is then rounded down to the nearest multiple of 16 by the andq instruction of line 6.
+
+The resulting value will be 8n + 8 when n is odd and 8n + 16 when n is even,
+and this value is subtracted from s1 to give s2
+
+b)
+
+The three instructions in this sequence round s2 up to the nearest multiple of 8. They make use of the combination of biasing and shifting that we saw for dividing by a power of 2 in Section 2.3.7.
+
+c)
+
+n   s1      s2      p       e1  e2
+5   2065    2017    2024    1   7
+6   2064    2000    2000    16  0
+ 
+d)
+
+We can see that s2 is computed in a way that preserves whatever offset s1 has with the nearest multiple of 16. We can also see that p will be aligned on a multiple of 8, as is recommended for an array of 8-byte elements.
+
+--------------------------------------------------------------------------------
+
+3.50)
+
+double fcvt2(int * ip, float *fp, double *dp, long l) {
+    int i = *ip; float f = *fp; double d = *dp;
+
+    *ip = (int)val1;
+    *fp = (float)val2;
+    *dp = (double)val3;
+
+    return (double)val4;
+}
+
+# double fcvt2(int *ip, float *fp, double *dp, long l)
+
+#ip in %rdi, fp in %rsi, dp in %rdx, l in %rcx
+# Result returned in %xmm0
+
+fcvt2:
+    movl (%rdi), %eax
+    vmovss (%rsi), %xmm0
+    vcvttsd2si (%rdx), %r8d
+    movl %r8d, (%rdi)
+    vcvtsi2ss %eax, %xmm1, %xmm1
+    vmovss %xmm1, (%rsi)
+    vcvtsi2sdq %rcx, %xmm1, %xmm1
+    vmovsd %xmm1, (%rdx)
+    vunpcklps %xmm0, %xmm0, %xmm0
+    vcvtps2pd %xmm0, %xmm0
+    ret
+
+The value at dp is retrieved, converted to an int (line 4), and then stored at
+ip. We can therefore infer that val1 is d.
+
+The value at ip is retrieved, converted to a float (line 6), and then stored at
+fp. We can therefore infer that val2 is i.
+
+The value of l is converted to a double (line 8) and stored at dp. We can
+therefore infer that val3 is 1.
+
+The value at fp is retrieved on line 3. The two instructions at lines 10-11
+convert this to double precision as the value returned in register %xmmO. We
+can therefore infer that val4 is f.
+
+--------------------------------------------------------------------------------
+
+3.51)
+
+dest_t cvt(src_t x) {
+    dest_t y = (dest_t)x;
+
+    return y;
+}
+
+Tx      Ty      Instruction(s)
+long    double  vcvtsi2sdq %rdi, %xmm0
+
+double  int     vcvttsd2si %xmm0, %eax
+
+double  float   vunpcklpd %xmm0, %xmm0, %xmm0
+                vcvtpd2ps %xmm0, %xmm0
+
+long    float   vcvtsi2ssq %rdi, %xmm0, %xmm0
+
+float   long    vcvttss2siq %xmm0, %rax
+
+
+--------------------------------------------------------------------------------
+
+3.52)
+
+a) double g1(double a, long b, float c, int d);
+
+# a in %xmm0, b in %rdi, c in %xmm1, d in %esi
+
+b) double g2(int a, double *b, float *c, long d);
+
+# a in %edi, b in %rsi, c in %rdx, d in %rcx
+
+c) double g3(double *a, double b, int c, float d);
+
+# a in %rdi, b in %xmm0, c in %esi, d in %xmm1
+
+d) double g4(float a, int *b, float c, double d);
+
+# a in %xmm0, b in %rdi, c in %xmm1, d in %xmm2
+
+--------------------------------------------------------------------------------
+
+3.53)
+
+double funct1(arg1_t p, arg2_t q, arg3_t r, arg4_t s) {
+    return p / (q + r) - s;
+}
+
+funct1:
+    vcvtsi2ssq %rsi, %xmm2, %xmm2
+    vaddss %xmm0, %xmm2, %xmm0
+    vcvtsi2ss %edi, %xmm2, %xmm2
+    vdivss %xmm0, %xmm2, %xmm0
+    vunpcklps %xmm0, %xmm0, %xmm0
+    vcvtps2pd %xmm0, %xmm0
+    vsubsd %xmm1, %xmm0, %xmm0
+    ret
+     
+One possible combination of types is:
+
+arg1_t: int
+arg2_t: long
+arg3_t: float
+arg4_t: double
+
+--------------------------------------------------------------------------------
+
+3.54)
+
+double funct2(double w, int x, float y, long z)
+# w in %xmm0, x in %edi, y in %xmm1, z in %rsi
+
+funct2:
+    vcvtsi2ss %edi, %xmm2, %xmm2
+    vmulss %xmm1, %xmm2, %xmm1
+    vunpcklps %xmm1, %xmm1, %xmm1
+    vcvtps2pd %xmm1, %xmm2
+    vcvtsi2sdq %rsi, %xmm1, %xmm1
+    vdivsd %xmm1, %xmm0, %xmm0
+    vsubsd %xmm0, %xmm2, %xmm0
+    ret
+    
+double funct2(double w, int x, float y, long z) {
+    float xf = (float)x;
+    float r = xf * y;
+    double rr = (double)r;
+    
+    double dz = (double)z;
+    
+    double dv = w / dz;
+    
+    double res = rr - dv;
+    
+    return res;
+}
+
+--------------------------------------------------------------------------------
+
+3.55)
+
+The low order 4 bytes are coded as 0, as it should be in 32.0
+
+The high order 4 bytes are 1077936128 (0x40400000). The exponent field is 0x404, in decimal 1028.
+
+If we substract a bias of 1023, we get the exponent 1028 - 1023 = 5. The base is 2 (binary), so 2^5 = 32.
+
+--------------------------------------------------------------------------------
+
+3.56)
+
+double simplefun(double x) {
+    return EXPR(x);
+}
+
+# x in %xmm0
+
+a)
+
+    vmovsd .LC1(%rip), %xmm1
+    vandpd %xmm1, %xmm0, %xmm0
+.LC1:
+    .long 4294967295
+    .long 2147483647
+    .long 0
+    .long 0
+
+EXPR(x): fabs(x)
+
+b) 
+
+    vxorpd %xmm0, %xmm0, %xmm0
+    
+EXPR(x): x = 0.0
+
+c)
+
+    vmovsd .LC2(%rip), %xmm1
+    vxorpd %xmm1, %xmm0, %xmm0
+.LC2:
+    .long 0
+    .long -2147483648
+    .long 0
+    .long 0
+    
+EXPR(x): x = -x
+
+--------------------------------------------------------------------------------
+
+3.57)
+
+# double funct3(int *ap, double b, long c, float *dp)
+# ap in %rdi, b in %xmm0, c in %rsi, dp in %rdx
+
+funct3:
+    vmovss (%rdx), %xmm1
+    vcvtsi2sd (%rdi), %xmm2, %xmm2
+    vucomisd %xmm2, %xmm0
+    jbe .L8
+    vcvtsi2ssq %rsi, %xmm0, %xmm0
+    vmulss %xmm1, %xmm0, %xmm1
+    vunpcklps %xmm1, %xmm1, %xmm1
+    vcvtps2pd %xmm1, %xmm0
+    ret
+.L8:
+    vaddss %xmm1, %xmm1, %xmm1
+    vcvtsi2ssq %rsi, %xmm0, %xmm0
+    vaddss %xmm1, %xmm0, %xmm0
+    vunpcklps %xmm0, %xmm0, %xmm0
+    vcvtps2pd %xmm0, %xmm0
+    ret
+    
+double funct3(int *ap, double b, long c, float *dp) {
+    float dpf = *dp;
+    int a = *ap;
+    double aa = (double)a;
+    
+    if (aa <= b) {
+        float cf = (float)c;
+        double dcf = (double)cf;
+        
+        return dcf * dpf;
+    } else {
+        float cf = (float)c;
+        double dcf = (double)cf;
+        
+        return c + 2 * dpf
+    }
+}
